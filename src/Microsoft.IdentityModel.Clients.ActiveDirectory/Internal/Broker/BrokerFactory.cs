@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Broker
 #elif iOS
             return new iOSBroker(logger);
 #else
-            throw new NotImplementedException("Brokers are only implemented on Android and iOS. The UWP broker (WEB) does not use this interface.");
+            return new NullBroker();
 #endif
         }
     }
