@@ -407,10 +407,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AdalTokenCacheKey cacheKey = kvp.Value.Key;
                     resultEx = kvp.Value.Value.Clone();
 
-                    bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
-                                            DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
-                    bool tokenExtendedLifeTimeExpired = (resultEx.Result.ExtendedExpiresOn <=
-                                                         DateTime.UtcNow);
+                    bool tokenNearExpiry = resultEx.Result.ExpiresOn <=
+                                            DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes);
+                    bool tokenExtendedLifeTimeExpired = resultEx.Result.ExtendedExpiresOn <= DateTime.UtcNow;
+                    bool tokenIsForSameResource = cacheKey.ResourceEquals(cacheQueryData.Resource);
 
                     //check for cross-tenant authority
                     if (!cacheKey.Authority.Equals(cacheQueryData.Authority, StringComparison.OrdinalIgnoreCase))
@@ -426,11 +426,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                         requestContext.Logger.Info("An expired or near expiry token was found in the cache");
                     }
-                    else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
+                    else if (!tokenIsForSameResource)
                     {
                         requestContext.Logger.InfoPii(
                             string.Format(CultureInfo.CurrentCulture,
-                                "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
+                                "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'. Note that the MRRT is not present when using the broker.",
                                 cacheKey.Resource, cacheQueryData.Resource),
                             string.Empty);
                         var newResultEx = new AdalResultWrapper
@@ -463,7 +463,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }
 
-                    if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
+                    if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null && tokenIsForSameResource)
                     {
                         this.tokenCacheDictionary.Remove(cacheKey);
                         requestContext.Logger.Info("An old item was removed from the cache");
