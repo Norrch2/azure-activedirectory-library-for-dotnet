@@ -102,8 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             if (accountList != null && accountList.Length > 0)
             {
-                _logger.InfoPii($"BrokerProxy: The broker found {accountList.Length} work and school accounts",
-                    "BrokerProxy: The broker found some accounts");
+                _logger.Info("BrokerProxy: The broker found some accounts");
             }
 
 
@@ -121,8 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
                     if (users != null && users.Length > 0)
                     {
-                        _logger.VerbosePii($"BrokerProxy: Found {users.Length} broker users",
-                            "Broker Proxy: Found some broker users");
+                        _logger.Verbose("Broker Proxy: Found some broker users");
                     }
 
                     UserInfo matchingUser = FindUserInfo(request.UserId, users);
